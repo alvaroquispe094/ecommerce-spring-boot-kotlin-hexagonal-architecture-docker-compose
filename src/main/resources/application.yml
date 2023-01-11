@@ -16,3 +16,8 @@ spring:
     show-sql: false
     generate-ddl: true
     database: postgresql
+
+#Token configuration
+jwt:
+  secret: bezKoderSecretKey
+  expiration: 86400000

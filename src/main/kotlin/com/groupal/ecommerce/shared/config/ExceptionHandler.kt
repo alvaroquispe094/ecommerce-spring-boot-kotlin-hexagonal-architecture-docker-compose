@@ -29,13 +29,13 @@ class ExceptionHandler(
 
     private val log = LoggerFactory.getLogger(ExceptionHandler::class.java)
 
-    @ExceptionHandler(Throwable::class)
+   /* @ExceptionHandler(Throwable::class)
     fun handle(ex: Throwable): ResponseEntity<ApiErrorResponse> {
         val httpStatus = HttpStatus.INTERNAL_SERVER_ERROR
         log.error(httpStatus.reasonPhrase, ex)
         val spError = MessageError.INTERNAL_ERROR
         return buildResponseError(httpStatus, ex, spError.errorCode, spError.defaultMessage)
-    }
+    }*/
 
     @ExceptionHandler(GenericException::class)
     fun handle(ex: GenericException): ResponseEntity<ApiErrorResponse> {

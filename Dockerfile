@@ -3,7 +3,7 @@
 #
 FROM gradle:6.9.1-alpine as build
 WORKDIR /app
-COPY . /app
+COPY src /app
 RUN gradle build -x test
 
 #

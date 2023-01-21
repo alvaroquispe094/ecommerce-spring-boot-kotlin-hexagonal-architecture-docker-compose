@@ -65,6 +65,33 @@ class AuthController {
         )
     }
 
+    @PostMapping("/auth/refresh")
+    fun authenticateRefreshUser(): ResponseEntity<*>? {
+
+        val user = "mgomez@gmail.com"
+        val pass = "Abcd#100"
+
+        val authentication = authenticationManager!!.authenticate(
+            UsernamePasswordAuthenticationToken
+                (user, pass)
+        )
+        SecurityContextHolder.getContext().authentication = authentication
+        val jwt: String = jwtUtils!!.generateJwtToken(authentication)
+        val userDetails: UserDetailsImpl = authentication.principal as UserDetailsImpl
+        val roles: List<String> = userDetails.authorities.stream()
+            .map { item -> item.authority }
+            .collect(Collectors.toList())
+        return ResponseEntity.ok<Any>(
+            JwtResponse(
+                jwt,
+                userDetails.id!!,
+                userDetails.username,
+                userDetails.email!!,
+                roles
+            )
+        )
+    }
+
     @PostMapping("/auth/signup")
     fun registerUser(@RequestBody signUpRequest: @Valid SignupRequest?): ResponseEntity<*>? {
         if (userRepository!!.existsByUsername(signUpRequest?.username)!!) {

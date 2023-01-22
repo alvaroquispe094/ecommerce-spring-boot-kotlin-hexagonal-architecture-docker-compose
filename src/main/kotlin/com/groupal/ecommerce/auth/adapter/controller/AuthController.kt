@@ -65,7 +65,7 @@ class AuthController {
         )
     }
 
-    /*@PostMapping("/auth/refresh")
+    @PostMapping("/auth/refresh")
     fun authenticateRefreshUser(): ResponseEntity<*>? {
 
         val user = "mgomez@gmail.com"
@@ -90,7 +90,7 @@ class AuthController {
                 roles
             )
         )
-    }*/
+    }
 
     @PostMapping("/auth/signup")
     fun registerUser(@RequestBody signUpRequest: @Valid SignupRequest?): ResponseEntity<*>? {

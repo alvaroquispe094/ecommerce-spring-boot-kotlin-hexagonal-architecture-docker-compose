@@ -77,8 +77,8 @@ class WebSecurityConfig: WebSecurityConfigurerAdapter() {
     override fun configure(http: HttpSecurity) {
         http.cors().and().csrf().disable().exceptionHandling().authenticationEntryPoint(unauthorizedHandler).and()
             .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and().authorizeRequests()
-            .antMatchers("/api/v1/auth/**").permitAll()
-            .antMatchers("/api/v1/user/**").access("hasRole('ROLE_USER') or hasRole('ROLE_MODERATOR') or hasRole('ROLE_ADMIN')")
+            .antMatchers("/api/v1/auth/signin","/api/v1/auth/signup").permitAll()
+            .antMatchers("/api/v1/auth/refresh","/api/v1/user/**").access("hasRole('ROLE_USER') or hasRole('ROLE_MODERATOR') or hasRole('ROLE_ADMIN')")
             .antMatchers("/api/v1/mod/**").access("hasRole('ROLE_MODERATOR') ")
             .antMatchers("/api/v1/product/**").access("hasRole('ADMIN') ")
             .anyRequest().authenticated()

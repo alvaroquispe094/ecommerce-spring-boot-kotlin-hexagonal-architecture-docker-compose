@@ -21,4 +21,4 @@ spring:
 #Token configuration
 jwt:
   secret: bezKoderSecretKey
-  expiration: 86400000
+  expiration: 60

@@ -20,3 +20,4 @@ spring:
 jwt:
   secret: bezKoderSecretKey
   expiration: 86400000
+  refreshExpiration: 172800000

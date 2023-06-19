@@ -16,6 +16,21 @@ class JwtUtils {
     @Value("\${jwt.secret}")
     private val jwtSecret: String? = null
 
+    fun generateJwtToken(authentication: Authentication): String {
+        val userPrincipal = authentication.principal as UserDetailsImpl
+        return generateTokenFromUsername(userPrincipal.username)!!;
+    }
+
+    fun generateTokenFromUsername(username: String?): String? {
+        return Jwts.builder().setSubject(username).setIssuedAt(Date())
+            .setExpiration(Date(Date().time + jwtExpirationMs)).signWith(SignatureAlgorithm.HS512, jwtSecret)
+            .compact()
+    }
+
+    fun getUserNameFromJwtToken(token: String?): String {
+        return Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(token).body.subject
+    }
+
     fun validateJwtToken(authToken: String?): Boolean {
         try {
             Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(authToken)
@@ -32,20 +47,6 @@ class JwtUtils {
             logger.error("JWT claims string is empty: {}", e.message)
         }
         return false
-    }
-
-    fun generateJwtToken(authentication: Authentication): String {
-        val userPrincipal = authentication.principal as UserDetailsImpl
-        return Jwts.builder()
-            .setSubject(userPrincipal.username)
-            .setIssuedAt(Date())
-            .setExpiration(Date(Date().time + jwtExpirationMs))
-            .signWith(SignatureAlgorithm.HS512, jwtSecret)
-            .compact()
-    }
-
-    fun getUserNameFromJwtToken(token: String?): String {
-        return Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(token).body.subject
     }
 
     companion object {

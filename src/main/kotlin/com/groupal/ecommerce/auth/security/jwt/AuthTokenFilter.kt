@@ -29,7 +29,12 @@ class AuthTokenFilter : OncePerRequestFilter() {
         filterChain: FilterChain
     ) {
         try {
-            val jwt = parseJwt(request)
+            if (request.getServletPath().contains("/api/v1/auth")) {
+                filterChain.doFilter(request, response);
+                return;
+            }
+
+            val jwt = parseJwt(request, response, filterChain)
             if (jwt != null && jwtUtils!!.validateJwtToken(jwt)) {
                 val username = jwtUtils.getUserNameFromJwtToken(jwt)
                 val userDetails: UserDetails = userDetailsService!!.loadUserByUsername(username)
@@ -45,7 +50,7 @@ class AuthTokenFilter : OncePerRequestFilter() {
         filterChain.doFilter(request, response)
     }
 
-    private fun parseJwt(request: HttpServletRequest): String? {
+    private fun parseJwt(request: HttpServletRequest, response: HttpServletResponse, filterChain: FilterChain): String? {
         val headerAuth: String = request.getHeader("Authorization")
         return if (StringUtils.hasText(headerAuth) && headerAuth.startsWith("Bearer ")) {
             headerAuth.substring(7, headerAuth.length)

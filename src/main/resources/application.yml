@@ -1,14 +1,13 @@
 # Spring configurations
 spring:
-  profiles:
-    active: "´prod"
   main:
     allow-bean-definition-overriding: false
   # Database
   datasource:
-    url: jdbc:postgresql://${RDS_HOSTNAME}:${RDS_PORT}/${RDS_DB_NAME}
-    username: ${RDS_USERNAME}
-    password: ${RDS_PASSWORD}
+    url: jdbc:postgresql://localhost:5432/ecommerce-db?useSSL=false
+    username: postgres
+    password: postgres
+
   # JPA properties
   jpa:
     hibernate:
@@ -16,9 +15,9 @@ spring:
     show-sql: false
     generate-ddl: true
     database: postgresql
-    database-platform: org.hibernate.dialect.PostgreSQLDialect
 
 #Token configuration
 jwt:
   secret: bezKoderSecretKey
-  expiration: 3600000
+  expiration: 60000
+  refreshExpiration: 120000

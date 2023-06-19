@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.groupal.ecommerce.auth.security.jwt.AuthEntryPointJwt
 import com.groupal.ecommerce.auth.security.jwt.AuthTokenFilter
 import com.groupal.ecommerce.auth.security.services.UserDetailsServiceImpl
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -47,6 +48,7 @@ class WebSecurityConfig: WebSecurityConfigurerAdapter() {
     @Bean
     fun accessDeniedHandler(): AccessDeniedHandler? {
         return AccessDeniedHandler { request: HttpServletRequest?, response: HttpServletResponse, ex: AccessDeniedException? ->
+            logger.error("Denied error: {}", "Role authentication is required to access this resource")
             response.status = HttpServletResponse.SC_FORBIDDEN
             response.contentType = MediaType.APPLICATION_JSON_VALUE
             val body: MutableMap<String, Any?> = HashMap()
@@ -77,8 +79,8 @@ class WebSecurityConfig: WebSecurityConfigurerAdapter() {
     override fun configure(http: HttpSecurity) {
         http.cors().and().csrf().disable().exceptionHandling().authenticationEntryPoint(unauthorizedHandler).and()
             .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and().authorizeRequests()
-            .antMatchers("/api/v1/auth/signin","/api/v1/auth/signup").permitAll()
-            .antMatchers("/api/v1/auth/refresh","/api/v1/user/**").access("hasRole('ROLE_USER') or hasRole('ROLE_MODERATOR') or hasRole('ROLE_ADMIN')")
+            .antMatchers("/api/v1/auth/signin","/api/v1/auth/signup", "/api/v1/auth/refresh").permitAll()
+            .antMatchers("/api/v1/user/**").access("hasRole('ROLE_USER') or hasRole('ROLE_MODERATOR') or hasRole('ROLE_ADMIN')")
             .antMatchers("/api/v1/mod/**").access("hasRole('ROLE_MODERATOR') ")
             .antMatchers("/api/v1/product/**").access("hasRole('ADMIN') ")
             .anyRequest().authenticated()
@@ -87,5 +89,9 @@ class WebSecurityConfig: WebSecurityConfigurerAdapter() {
             UsernamePasswordAuthenticationFilter::class.java
         )
         http.exceptionHandling().accessDeniedHandler(accessDeniedHandler());
+    }
+
+    companion object {
+        private val logger = LoggerFactory.getLogger(AuthEntryPointJwt::class.java)
     }
 }

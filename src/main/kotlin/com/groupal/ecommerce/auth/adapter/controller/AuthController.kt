@@ -1,5 +1,7 @@
 package com.groupal.ecommerce.auth.adapter.controller
 
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.databind.SerializationFeature
 import com.groupal.ecommerce.auth.exception.TokenRefreshException
 import com.groupal.ecommerce.auth.models.ERole
 import com.groupal.ecommerce.auth.models.RefreshToken
@@ -51,8 +53,11 @@ class AuthController {
     @Autowired
     var refreshTokenService: RefreshTokenService? = null
 
+    private val mapper = ObjectMapper().enable(SerializationFeature.INDENT_OUTPUT)
+
     @PostMapping("/auth/signin")
     fun authenticateUser(@RequestBody loginRequest: @Valid LoginRequest?): ResponseEntity<*>? {
+        logger.info("Llamada al controller api/v1/auth/signin")
 
         val authentication = authenticationManager!!.authenticate(
             UsernamePasswordAuthenticationToken
@@ -72,11 +77,13 @@ class AuthController {
 
         return ResponseEntity.ok(JwtResponse(jwt, refreshToken.token!!, userDetails.id,
         userDetails.username, userDetails.email!!, roles))
+            .log { logger.info("Fin a llamada al controller /api/v1/auth/signin con response {}: ", mapper.writeValueAsString(it)) }
 
     }
 
     @PostMapping("/auth/refresh")
     fun refreshtoken(@RequestBody request: @Valid TokenRefreshRequest?): ResponseEntity<*>? {
+        logger.info("Llamada al controller api/v1/auth/refresh")
         val requestRefreshToken: @NotBlank String? = request!!.refreshToken
         return refreshTokenService!!.findByToken(requestRefreshToken!!)
             .map(refreshTokenService!!::verifyExpiration)
@@ -93,6 +100,7 @@ class AuthController {
                     "Refresh token is not in database!"
                 )
             }
+            .log { logger.info("Fin a llamada al controller /api/v1/auth/refresh con response {}: ", mapper.writeValueAsString(it)) }
     }
 
     @PostMapping("/auth/signup")

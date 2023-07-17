@@ -2,10 +2,13 @@ package com.groupal.ecommerce.auth.security.jwt
 
 import com.groupal.ecommerce.auth.security.services.UserDetailsImpl
 import io.jsonwebtoken.*
+import io.jsonwebtoken.io.*
+import io.jsonwebtoken.security.Keys
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.security.core.Authentication
 import org.springframework.stereotype.Component
+import java.security.Key
 import java.util.*
 
 @Component
@@ -18,25 +21,31 @@ class JwtUtils {
 
     fun generateJwtToken(authentication: Authentication): String {
         val userPrincipal = authentication.principal as UserDetailsImpl
-        return generateTokenFromUsername(userPrincipal.username)!!;
+        return generateTokenFromUsername(userPrincipal.username)!!
     }
 
     fun generateTokenFromUsername(username: String?): String? {
-        return Jwts.builder().setSubject(username).setIssuedAt(Date())
-            .setExpiration(Date(Date().time + jwtExpirationMs)).signWith(SignatureAlgorithm.HS512, jwtSecret)
+        return Jwts.builder()
+            .setSubject(username)
+            .setIssuedAt(Date())
+            .setExpiration(Date(Date().time + jwtExpirationMs))
+            .signWith(getSignInKey(), SignatureAlgorithm.HS256)
             .compact()
     }
 
+    private fun getSignInKey(): Key? {
+        val keyBytes = Decoders.BASE64.decode(jwtSecret)
+        return Keys.hmacShaKeyFor(keyBytes)
+    }
+
     fun getUserNameFromJwtToken(token: String?): String {
-        return Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(token).body.subject
+        return Jwts.parserBuilder().setSigningKey(getSignInKey()).build().parseClaimsJws(token).body.subject
     }
 
     fun validateJwtToken(authToken: String?): Boolean {
         try {
-            Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(authToken)
+            Jwts.parserBuilder().setSigningKey(getSignInKey()).build().parse(authToken)
             return true
-        } catch (e: SignatureException) {
-            logger.error("Invalid JWT signature: {}", e.message)
         } catch (e: MalformedJwtException) {
             logger.error("Invalid JWT token: {}", e.message)
         } catch (e: ExpiredJwtException) {
